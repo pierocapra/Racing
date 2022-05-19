@@ -3,30 +3,35 @@ const TRACK_H = 40;
 const TRACK_GAP = 2;
 const TRACK_COLS = 20;
 const TRACK_ROWS = 15;
-var trackGrid = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+var trackGrid = [4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
                  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
                  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
                  1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,
-                 1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,
+                 1,0,0,1,1,1,1,1,1,4,4,1,1,1,1,1,1,0,0,1,
+                 1,0,0,1,1,0,0,0,1,4,4,1,0,0,0,0,1,0,0,1,
                  1,0,0,1,1,0,0,0,1,1,1,1,0,0,0,0,1,0,0,1,
-                 1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,1,0,0,1,
                  1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,
-                 1,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,
-                 1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,
+                 1,0,0,1,1,0,0,0,0,0,5,0,0,5,0,0,1,0,0,1,
+                 1,0,0,1,0,0,0,5,0,0,0,0,0,1,0,0,1,0,0,1,
                  1,0,2,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,1,
-                 1,0,0,1,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,1,
-                 1,0,0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,0,1,
-                 1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,
-                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+                 1,3,3,1,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,1,
+                 1,0,0,0,0,0,1,4,4,1,0,0,1,1,0,0,0,0,0,1,
+                 1,0,0,0,0,0,1,4,4,1,1,1,1,1,1,0,0,0,1,1,
+                 1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,1,1,1,1,4];
 const TRACK_ROAD = 0;   
 const TRACK_WALL = 1;   
-const TRACK_PLAYERSTART = 2;   
+const TRACK_PLAYERSTART = 2;  
+const TRACK_GOAL= 3;
+const TRACK_TREE= 4;
+const TRACK_FLAG= 5;
 
-const isWallAtColRow = (col, row) => {
+const isObstacleAtColRow = (col, row) => {
     if (col >= 0 && col < TRACK_COLS &&
         row >= 0 && row < TRACK_ROWS){
             var trackIndexUnderCoord = rowColToArrayIndex(col, row);
-            return trackGrid[trackIndexUnderCoord] == TRACK_WALL;
+            if(trackGrid[trackIndexUnderCoord] == TRACK_WALL || trackGrid[trackIndexUnderCoord] == TRACK_FLAG){
+                return true;
+            }
         } else {
             return false;
         }
@@ -35,16 +40,15 @@ const isWallAtColRow = (col, row) => {
 const carTrackHandling = () =>{
     var carTrackCol = Math.floor(carX / TRACK_W);
     var carTrackRow = Math.floor(carY / TRACK_H);
-    // var trackIndexUnderCar = rowColToArrayIndex(carTrackCol, carTrackRow);
 
     if(carTrackCol >= 0 && 
         carTrackCol < TRACK_COLS &&
         carTrackRow >= 0 &&
         carTrackRow < TRACK_ROWS 
         ) {
-            if (isWallAtColRow(carTrackCol, carTrackRow)){
+            if (isObstacleAtColRow(carTrackCol, carTrackRow)){
                 carX -= Math.cos(carAng) * carSpeed;
-			carY -= Math.sin(carAng) * carSpeed;
+			    carY -= Math.sin(carAng) * carSpeed;
                 carSpeed*=-0.5
             }
     }
@@ -59,12 +63,31 @@ const drawTracks = () => {
         for (let eachCol = 0; eachCol < TRACK_COLS; eachCol++){
 
             var arrayIndex = rowColToArrayIndex(eachCol, eachRow);
+            var tileKindHere = trackGrid[arrayIndex];
+            var useImg;
 
-            if(trackGrid[arrayIndex] == TRACK_WALL){
-                canvasContext.drawImage(wallPic, TRACK_W* eachCol, TRACK_H  * eachRow);
-            }else if(trackGrid[arrayIndex] == TRACK_ROAD || TRACK_PLAYERSTART){
-                canvasContext.drawImage(roadPic, TRACK_W* eachCol, TRACK_H  * eachRow);
-            }  
+            switch(tileKindHere){
+                case TRACK_WALL:
+                    useImg = wallPic;
+                    break;
+                case TRACK_ROAD :
+                    useImg = roadPic;
+                    break;
+                // case TRACK_PLAYERSTART :
+                //     useImg = roadPic;
+                //     break;
+                case TRACK_GOAL :
+                    useImg = goalPic;
+                    break;        
+                case TRACK_TREE :
+                    useImg = treePic;
+                    break;
+                case TRACK_FLAG :
+                    useImg = flagPic;
+                    break;
+            }
+             
+            canvasContext.drawImage(useImg, TRACK_W* eachCol, TRACK_H  * eachRow);
         }
     }
 }

@@ -1,7 +1,3 @@
-var roadPic = document.createElement("img");
-var wallPic = document.createElement("img");
-
-
 const TRACK_W = 40;
 const TRACK_H = 40;
 const TRACK_GAP = 2;
@@ -18,18 +14,13 @@ var trackGrid = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
                  1,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,
                  1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,
                  1,0,2,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,1,
-                 1,1,1,1,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,1,
+                 1,0,0,1,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,1,
                  1,0,0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,0,1,
                  1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,
                  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
 const TRACK_ROAD = 0;   
 const TRACK_WALL = 1;   
 const TRACK_PLAYERSTART = 2;   
-
-const trackLoadImages = ()=> {
-    roadPic.src = "imgs/track_road.png";
-    wallPic.src = "imgs/track_wall.png";
-}
 
 const isWallAtColRow = (col, row) => {
     if (col >= 0 && col < TRACK_COLS &&
@@ -44,7 +35,7 @@ const isWallAtColRow = (col, row) => {
 const carTrackHandling = () =>{
     var carTrackCol = Math.floor(carX / TRACK_W);
     var carTrackRow = Math.floor(carY / TRACK_H);
-    var trackIndexUnderCar = rowColToArrayIndex(carTrackCol, carTrackRow);
+    // var trackIndexUnderCar = rowColToArrayIndex(carTrackCol, carTrackRow);
 
     if(carTrackCol >= 0 && 
         carTrackCol < TRACK_COLS &&

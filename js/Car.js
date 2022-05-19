@@ -1,6 +1,3 @@
-var carPic = document.createElement("img");
-var carPicLoaded = false;
-
 var carX = 75;
 var carY = 75;
 var carAng = 0;
@@ -48,14 +45,5 @@ const carMove = () => {
 }
 
 const carDraw = () => {
-    if(carPicLoaded) {
         drawBitmapCenteredWithRotation(carPic, carX, carY, carAng)
-    }
-}
-
-const carImageLoad = () =>{
-    carPic.onload = () => {
-        carPicLoaded = true;
-    }
-    carPic.src = "imgs/player1car.png";
 }

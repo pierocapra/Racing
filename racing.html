@@ -9,22 +9,39 @@
 <body>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
+        var carPic = document.createElement("img");
+        var carPicLoaded = false;
+
         var canvas, canvasContext;
 
-        var ballRadius = 10;
+        var carRadius = 10;
 
-        var ballX = 100;
-        var ballSpeedX = 5;
-        var ballY = 100;
-        var ballSpeedY = 8;
+        var carX = 100;
+        var carSpeedX = 5;
+        var carY = 100;
+        var carSpeedY = 8;
 
-        const BRICK_W = 80;
-        const BRICK_H = 20;
-        const BRICK_GAP = 2;
-        const BRICK_COLS = 10;
-        const BRICK_ROWS = 14;
-        var brickGrid = new Array(BRICK_COLS);
-        var bricksLeft = 0;
+        const TRACK_W = 40;
+        const TRACK_H = 40;
+        const TRACK_GAP = 2;
+        const TRACK_COLS = 20;
+        const TRACK_ROWS = 15;
+        var trackGrid = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                         1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+                         1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+                         1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,
+                         1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,
+                         1,0,0,1,1,0,0,0,1,1,1,1,0,0,0,0,1,0,0,1,
+                         1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,1,0,0,1,
+                         1,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,
+                         1,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,
+                         1,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,
+                         1,0,2,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,1,
+                         1,1,1,1,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,1,
+                         1,0,0,0,0,0,1,1,1,1,0,0,1,1,0,0,0,0,0,1,
+                         1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,
+                         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+        var tracksLeft = 0;
 
         var mouseX = 0;
         var mouseY = 0;
@@ -36,31 +53,13 @@
             mouseX = event.clientX - rect.left - root.scrollLeft;
             mouseY = event.clientY - rect.top - root.scrollTop;
 
-            //cheat to test ball in any position
-            // ballX = mouseX;
-            // ballY = mouseY;
-            // ballSpeedX = 3;
-            // ballSpeedY = -4;
+            //cheat to test car in any position
+            // carX = mouseX;
+            // carY = mouseY;
+            // carSpeedX = 3;
+            // carSpeedY = -4;
         }
 
-        const bricKReset = () =>{
-            bricksLeft = 0;
-            var i;
-            for(i=0; i<3*BRICK_COLS;i++){
-                brickGrid[i] = false;
-            }
-            for (; i<BRICK_COLS * BRICK_ROWS; i++){
-                // if (Math.random() < 0.3){
-                //     brickGrid[i] = false;
-                // } else {
-                //     brickGrid[i] = true;
-                // }
-                brickGrid[i] = true;
-                bricksLeft++;
-            }
-            // bricksLeft = BRICK_COLS * BRICK_ROWS;
-            // brickGrid[0] = false;
-        }
 
         window.onload = () => {
             canvas = document.getElementById('gameCanvas');
@@ -71,8 +70,12 @@
 
             canvas.addEventListener('mousemove', updateMousePos);
 
-            bricKReset();
-            ballReset();
+            carPic.onload = () => {
+                carPicLoaded = true;
+            }
+            carPic.src = "player1car.png";
+
+            carReset();
         }
 
         const updateAll = () => {
@@ -80,80 +83,87 @@
             drawAll();            
         }
 
-        const ballReset = () => {
-            ballX = canvas.width/2;
-            ballY = canvas.height/2;
+        const carReset = () => {
+            for (let eachRow = 0; eachRow < TRACK_ROWS; eachRow++){
+                for (let eachCol = 0; eachCol < TRACK_COLS; eachCol++){
+
+                    var arrayIndex = rowColToArrayIndex(eachCol, eachRow);
+
+                    if(trackGrid[arrayIndex] == 2){
+                        trackGrid[arrayIndex] == 0;
+                        carX = eachCol * TRACK_W + TRACK_W/2;
+                        carY = eachRow * TRACK_H + TRACK_H/2;
+                    }
+                }
+            }        
 
         }
 
-        const ballMove = () => {
-            ballX += ballSpeedX;
-            ballY += ballSpeedY;
+        const carMove = () => {
+            carX += carSpeedX;
+            carY += carSpeedY;
 
-            if (ballX < 0 && ballSpeedX < 0.0) { //left
-                ballSpeedX = -ballSpeedX;
+            if (carX < 0 && carSpeedX < 0.0) { //left
+                carSpeedX = -carSpeedX;
             }
-            if (ballX > canvas.width && ballSpeedX > 0.0) { //right
-                ballSpeedX = -ballSpeedX;
+            if (carX > canvas.width && carSpeedX > 0.0) { //right
+                carSpeedX = -carSpeedX;
             }
-            if ( ballY < 0 && ballSpeedY < 0.0) { //top
-                ballSpeedY = -ballSpeedY;
+            if ( carY < 0 && carSpeedY < 0.0) { //top
+                carSpeedY = -carSpeedY;
             }
-            if (ballY > canvas.height + ballRadius){ //bottom
-                ballReset();
-                bricKReset();
+            if (carY > canvas.height + carRadius){ //bottom
+                carReset();
             }
         }
 
-        const isBrickAtColRow = (col, row) => {
-            if (col >= 0 && col < BRICK_COLS &&
-                row >= 0 && row < BRICK_ROWS){
-                    var brickIndexUnderCoord = rowColToArrayIndex(col, row);
-                    return brickGrid[brickIndexUnderCoord];
+        const isTrackAtColRow = (col, row) => {
+            if (col >= 0 && col < TRACK_COLS &&
+                row >= 0 && row < TRACK_ROWS){
+                    var trackIndexUnderCoord = rowColToArrayIndex(col, row);
+                    return trackGrid[trackIndexUnderCoord] == 1;
                 } else {
                     return false;
                 }
         }
 
-        const ballBrickHandling = () =>{
-            var ballBrickCol = Math.floor(ballX / BRICK_W);
-            var ballBrickRow = Math.floor(ballY / BRICK_H);
-            var brickIndexUnderBall = rowColToArrayIndex(ballBrickCol, ballBrickRow);
+        const carTrackHandling = () =>{
+            var carTrackCol = Math.floor(carX / TRACK_W);
+            var carTrackRow = Math.floor(carY / TRACK_H);
+            var trackIndexUnderCar = rowColToArrayIndex(carTrackCol, carTrackRow);
 
-            if(ballBrickCol >= 0 && 
-                ballBrickCol < BRICK_COLS &&
-                ballBrickRow >= 0 &&
-                ballBrickRow < BRICK_ROWS 
+            if(carTrackCol >= 0 && 
+                carTrackCol < TRACK_COLS &&
+                carTrackRow >= 0 &&
+                carTrackRow < TRACK_ROWS 
                 ) {
-                    if (isBrickAtColRow(ballBrickCol, ballBrickRow)){
-                        brickGrid[brickIndexUnderBall] = false;
-                        bricksLeft--;
+                    if (isTrackAtColRow(carTrackCol, carTrackRow)){
                         
-                        var prevBallX = ballX - ballSpeedX;
-                        var prevBallY = ballY - ballSpeedY;
-                        var prevBrickCol = Math.floor(prevBallX / BRICK_W);
-                        var prevBrickRow = Math.floor(prevBallY / BRICK_H);
+                        var prevCarX = carX - carSpeedX;
+                        var prevCarY = carY - carSpeedY;
+                        var prevTrackCol = Math.floor(prevCarX / TRACK_W);
+                        var prevTrackRow = Math.floor(prevCarY / TRACK_H);
 
                         var bothTestsFailed = true;
 
-                        if (prevBrickCol != ballBrickCol){
+                        if (prevTrackCol != carTrackCol){
 
-                            // var adjBrickSide = rowColToArrayIndex(prevBrickCol, ballBrickRow);
-                            if (isBrickAtColRow(prevBrickCol, ballBrickRow)==false){
-                                ballSpeedX *= -1;
+                            // var adjTrackSide = rowColToArrayIndex(prevTrackCol, carTrackRow);
+                            if (isTrackAtColRow(prevTrackCol, carTrackRow)==false){
+                                carSpeedX *= -1;
                                 bothTestsFailed = false;
                             }
                         }
-                        if (prevBrickRow != ballBrickRow){
-                            // var adjBrickTopBot = rowColToArrayIndex(ballBrickCol, prevBrickRow);
-                            if (isBrickAtColRow(ballBrickCol, prevBrickRow)==false){
-                                ballSpeedY *= -1;
+                        if (prevTrackRow != carTrackRow){
+                            // var adjTrackTopBot = rowColToArrayIndex(carTrackCol, prevTrackRow);
+                            if (isTrackAtColRow(carTrackCol, prevTrackRow)==false){
+                                carSpeedY *= -1;
                                 bothTestsFailed = false;
                             }
                         }
                         if (bothTestsFailed){
-                            ballSpeedX *= -1;
-                            ballSpeedY *= -1;
+                            carSpeedX *= -1;
+                            carSpeedY *= -1;
                         }
                     }
             }
@@ -162,24 +172,24 @@
 
         const moveAll = () => {
 
-            ballMove();
+            // carMove();
 
-            ballBrickHandling();
+            carTrackHandling();
 
         }
 
         const rowColToArrayIndex = (col, row) => {
-            return col + BRICK_COLS * row;
+            return col + TRACK_COLS * row;
         }
 
-        const drawBricks = () => {
-            for (let eachRow = 0; eachRow < BRICK_ROWS; eachRow++){
-                for (let eachCol = 0; eachCol < BRICK_COLS; eachCol++){
+        const drawTracks = () => {
+            for (let eachRow = 0; eachRow < TRACK_ROWS; eachRow++){
+                for (let eachCol = 0; eachCol < TRACK_COLS; eachCol++){
 
                     var arrayIndex = rowColToArrayIndex(eachCol, eachRow);
 
-                    if(brickGrid[arrayIndex]){
-                        colorRect(BRICK_W* eachCol, BRICK_H  * eachRow , BRICK_W - BRICK_GAP, BRICK_H - BRICK_GAP,'blue');
+                    if(trackGrid[arrayIndex] == 1){
+                        colorRect(TRACK_W* eachCol, TRACK_H  * eachRow , TRACK_W - TRACK_GAP, TRACK_H - TRACK_GAP,'blue');
                     }
                 }
             }
@@ -188,11 +198,12 @@
         const drawAll = () => {
             colorRect(0, 0, canvas.width,canvas.height,'black');
 
-            colorCircle(ballX, ballY, ballRadius, 'white');
-            
-            drawBricks();
+            // colorCircle(carX, carY, carRadius, 'white');
+            if(carPicLoaded) {
+                canvasContext.drawImage(carPic, carX -carPic.width/2, carY -carPic.height/2)
+            }
 
-             // colorText(mouseBrickCol+","+mouseBrickRow+":"+brickIndexUnderMouse, mouseX,mouseY,"yellow");
+            drawTracks();
         }
 
         const colorRect = (topLeftX, topLeftY, boxWidth, boxHeight,fillColor) => {

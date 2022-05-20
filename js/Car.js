@@ -15,7 +15,7 @@ const carReset = () => {
             var arrayIndex = rowColToArrayIndex(eachCol, eachRow);
 
             if(trackGrid[arrayIndex] == TRACK_PLAYERSTART){
-                trackGrid[arrayIndex] == TRACK_ROAD;
+                trackGrid[arrayIndex] = TRACK_ROAD;
                 carAng = -Math.PI / 2; //point car up
                 carX = eachCol * TRACK_W + TRACK_W/2;
                 carY = eachRow * TRACK_H + TRACK_H/2;
